@@ -123,58 +123,39 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
 };
 
-function Home(): React.ReactElement {
+function Home() {
   return (
-    <section className="page">
-        <h2>Bienvenido</h2>
-        <p>Este es el incio de nuestro proyecto React + TypeScript.</p>
+    <div className="page-container">
       
-      <article style={styles.moreInfoSection}>
-        <h3
-          style={{
-            ...styles.featureTitle,
-            marginBottom: "25px",
-            textAlign: "center",
-          }}
-        >
-          ¿Qué es Pandas en Python?
-        </h3>
-        <div style={styles.infoFlex}>
-          
-          <div style={{ flex: 1 }}>
-            <p style={styles.featureText}>
-              Pandas es una biblioteca de Python de código abierto usada para 
-              la manipulación y el análisis de datos. Permite trabajar de forma 
-              rápida y flexible con datos en forma de tablas (como hojas de 
-              cálculo de Excel o tablas SQL), facilitando tareas como limpiar, 
-              filtrar, unir y resumir información numérica y estadística
-            </p>
-            <h4 style={{ ...styles.featureTitle, marginTop: "30px" }}>
-              Estructuras principales de Pandas:
-            </h4>
-            <ul style={styles.infoTextList}>
-              <li>
-                <strong>Series:</strong> Una columna o vector de datos 
-                unidimensional con etiquetas (índices).</li>
-              <li>
-                <strong>DataFrame:</strong>  Una tabla bidimensional de 
-                filas y columnas, muy parecida a una tabla de Excel.
-              </li>
-              <li>
-                <strong>Limpieza de Datos:</strong> Herramientas inigualables
-                para tratar valores nulos, duplicados y datos inconsistentes.
-              </li>
-              <li>
-                <strong>I/O Extenso:</strong> Lee y escribe datos de una
-                variedad enorme de fuentes y formatos (CSV, Excel, SQL, JSON,
-                Parquet, etc.).
-              </li>
-            </ul>
-            
-          </div>
+      <h1 className="page-title">BIENVENIDO</h1>
+      
+      <p className="intro-text">
+        Este es el inicio de nuestro proyecto <strong>React + TypeScript</strong>.
+      </p>
+
+      <div className="white-box">
+        
+        <div className="info-card">
+          <h2>¿Qué es Pandas en Python?</h2>
+          <p>
+            Pandas es una biblioteca de Python de código abierto usada para la manipulación y el análisis de datos. 
+            Permite trabajar de forma rápida y flexible con datos en forma de tablas (como hojas de cálculo de Excel o tablas SQL), 
+            facilitando tareas como limpiar, filtrar, unir y resumir información numérica y estadística.
+          </p>
         </div>
-      </article>
-    </section>
+
+        <div className="info-card">
+          <h2>Estructuras principales de Pandas:</h2>
+          <ul>
+            <li><strong>Series:</strong> Una columna o vector de datos unidimensional con etiquetas (índices).</li>
+            <li><strong>DataFrame:</strong> Una tabla bidimensional de filas y columnas, muy parecida a una tabla de Excel.</li>
+            <li><strong>Limpieza de Datos:</strong> Herramientas inigualables para tratar valores nulos, duplicados y datos inconsistentes.</li>
+            <li><strong>I/O Extenso:</strong> Lee y escribe datos de una variedad enorme de fuentes y formatos (CSV, Excel, SQL, JSON, Parquet, etc.).</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
   );
 }
 

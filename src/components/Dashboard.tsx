@@ -187,7 +187,6 @@ const Dashboard = (): React.ReactElement => {
 
   return (
     <div style={css.app}>
-
       <aside style={css.menu}>
         <div style={css.logo}>DASHBOARD</div>
 
@@ -214,12 +213,9 @@ const Dashboard = (): React.ReactElement => {
       </aside>
 
       <main style={css.content}>
-
         {section !== "reports" && (
           <>
             <div style={css.toolbar}>
-              
-
               <input
                 ref={input}
                 type="file"
@@ -231,8 +227,8 @@ const Dashboard = (): React.ReactElement => {
               <div
                 style={{
                   ...css.drop,
-                  borderColor: dragging ? "#2563eb" : "#cbd5e1",
-                  backgroundColor: dragging ? "#eff6ff" : "#fff",
+                  borderColor: dragging ? "rgba(56, 189, 248, 0.6)" : "rgba(56, 189, 248, 0.3)",
+                  backgroundColor: dragging ? "rgba(30, 41, 59, 0.8)" : "rgba(30, 41, 59, 0.6)",
                 }}
                 onDragOver={e => {
                   e.preventDefault();
@@ -263,7 +259,6 @@ const Dashboard = (): React.ReactElement => {
 
             {files.map(file => (
               <section key={file.key} style={css.card}>
-
                 <header style={css.cardHeader}>
                   <div>
                     <h2>{section === "pandas" ? "Pandas" : "NumPy"}</h2>
@@ -283,7 +278,7 @@ const Dashboard = (): React.ReactElement => {
                     <thead>
                       <tr>
                         {file.columns.map(column => (
-                          <th key={column}>{column}</th>
+                          <th key={column} style={css.tableHeader}>{column}</th>
                         ))}
                       </tr>
                     </thead>
@@ -292,7 +287,7 @@ const Dashboard = (): React.ReactElement => {
                       {file.data.slice(0, 10).map((row, index) => (
                         <tr key={index}>
                           {file.columns.map((_, column) => (
-                            <td key={column}>{row[column] || ""}</td>
+                            <td key={column} style={css.tableCell}>{row[column] || ""}</td>
                           ))}
                         </tr>
                       ))}
@@ -303,21 +298,21 @@ const Dashboard = (): React.ReactElement => {
                 <div style={css.actions}>
                   {section === "pandas" ? (
                     <>
-                      <button onClick={() => describe(file.key)}>
+                      <button style={css.actionButton} onClick={() => describe(file.key)}>
                         Resumen
                       </button>
 
-                      <button onClick={() => head(file.key)}>
+                      <button style={css.actionButton} onClick={() => head(file.key)}>
                         Primeros datos
                       </button>
                     </>
                   ) : (
                     <>
-                      <button onClick={() => statistics(file.key)}>
+                      <button style={css.actionButton} onClick={() => statistics(file.key)}>
                         Estadísticas
                       </button>
 
-                      <button onClick={() => makeArray(file.key)}>
+                      <button style={css.actionButton} onClick={() => makeArray(file.key)}>
                         Crear Array
                       </button>
                     </>
@@ -364,169 +359,241 @@ const Dashboard = (): React.ReactElement => {
 
 const css: Record<string, React.CSSProperties> = {
   back: {
-  marginBottom: "20px",
-  padding: "9px 16px",
-  background: "#fff",
-  color: "#475569",
-  border: "1px solid #cbd5e1",
-  borderRadius: "8px",
-  cursor: "pointer",
-  fontWeight: 600,
+    padding: "10px 18px",
+    background: "rgba(30, 41, 59, 0.8)",
+    color: "#ffffff",
+    border: "1px solid rgba(56, 189, 248, 0.3)",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: 600,
+    fontSize: "14px",
+    boxShadow: "0 2px 10px rgba(0, 0, 0, 0.3)",
+    transition: "all 0.2s ease",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "5px",
   },
-
 
   app: {
     display: "flex",
     minHeight: "100vh",
-    background: "#f1f5f9",
-    color: "#1e293b",
-    fontFamily: "Arial, sans-serif",
+    background: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)",
+    color: "#ffffff",
+    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    overflowX: "hidden",
   },
 
   menu: {
     width: "220px",
     padding: "25px 15px",
-    background: "#172033",
+    background: "rgba(15, 23, 42, 0.95)",
+    backdropFilter: "blur(10px)",
     display: "flex",
     flexDirection: "column",
     gap: "8px",
+    position: "fixed",
+    top: 0,
+    left: 0,
+    height: "100vh",
+    zIndex: 100,
+    borderRight: "1px solid rgba(56, 189, 248, 0.2)",
+    boxShadow: "4px 0 15px rgba(0, 0, 0, 0.3)",
   },
 
   logo: {
-    color: "#fff",
+    color: "#ffffff",
     fontSize: "20px",
     fontWeight: "bold",
     padding: "10px",
-    marginBottom: "20px",
+    marginBottom: "30px",
+    textShadow: "0 0 10px rgba(56, 189, 248, 0.5)",
+    letterSpacing: "0.5px",
   },
 
   menuButton: {
     padding: "13px",
     textAlign: "left",
-    border: 0,
+    border: "1px solid transparent",
     borderRadius: "8px",
     background: "transparent",
     color: "#94a3b8",
     cursor: "pointer",
     fontSize: "14px",
+    fontWeight: 500,
+    transition: "all 0.2s ease",
   },
 
   selected: {
     padding: "13px",
     textAlign: "left",
-    border: 0,
+    border: "1px solid rgba(255, 1, 1, 0.3)",
     borderRadius: "8px",
-    background: "#2563eb",
-    color: "#fff",
+    background: "rgba(255, 1, 1, 0.2)",
+    color: "#ff0101",
     cursor: "pointer",
     fontWeight: "bold",
+    boxShadow: "0 0 15px rgba(255, 1, 1, 0.4)",
+    transition: "all 0.2s ease",
   },
 
   content: {
     flex: 1,
-    padding: "30px",
+    padding: "40px",
     maxWidth: "1400px",
+    marginLeft: "220px",
+    minHeight: "100vh",
+    boxSizing: "border-box",
   },
 
   toolbar: {
     display: "flex",
     gap: "15px",
-    marginBottom: "25px",
+    marginBottom: "30px",
+    alignItems: "center",
+    flexWrap: "wrap",
   },
 
   upload: {
-    padding: "12px 20px",
+    padding: "12px 24px",
     border: 0,
     borderRadius: "8px",
-    background: "#2563eb",
-    color: "#fff",
+    background: "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%)",
+    color: "#ffffff",
     fontWeight: "bold",
     cursor: "pointer",
+    boxShadow: "0 4px 15px rgba(56, 189, 248, 0.4)",
+    borderBlock: "1px solid rgba(56, 189, 248, 0.3)",
+    transition: "all 0.2s ease",
+    fontSize: "14px",
   },
 
   drop: {
     flex: 1,
-    padding: "11px",
-    border: "2px dashed #cbd5e1",
-    borderRadius: "8px",
+    padding: "20px",
+    border: "2px dashed rgba(56, 189, 248, 0.3)",
+    borderRadius: "16px",
     textAlign: "center",
-    color: "#64748b",
+    color: "#94a3b8",
     cursor: "pointer",
+    background: "rgba(30, 41, 59, 0.6)",
+    transition: "all 0.3s ease",
+    fontSize: "15px",
+    minHeight: "80px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   empty: {
-    padding: "70px",
+    padding: "80px",
     textAlign: "center",
-    background: "#fff",
-    borderRadius: "12px",
+    background: "rgba(30, 41, 59, 0.7)",
+    borderRadius: "24px",
+    border: "1px solid rgba(56, 189, 248, 0.2)",
+    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
+    backdropFilter: "blur(10px)",
   },
 
   card: {
-    padding: "22px",
-    marginBottom: "20px",
-    background: "#fff",
-    borderRadius: "12px",
-    boxShadow: "0 4px 15px rgba(15,23,42,.06)",
+    padding: "30px",
+    marginBottom: "25px",
+    background: "rgba(30, 41, 59, 0.7)",
+    borderRadius: "24px",
+    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
+    border: "1px solid rgba(56, 189, 248, 0.2)",
+    backdropFilter: "blur(10px)",
   },
 
   cardHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "18px",
+    marginBottom: "20px",
   },
 
   remove: {
-    padding: "8px 12px",
-    border: "1px solid #fecaca",
-    borderRadius: "7px",
-    background: "#fef2f2",
-    color: "#dc2626",
+    padding: "8px 14px",
+    border: "1px solid rgba(255, 1, 1, 0.3)",
+    borderRadius: "8px",
+    background: "rgba(255, 1, 1, 0.2)",
+    color: "#ff0101",
     cursor: "pointer",
+    fontWeight: 600,
+    boxShadow: "0 0 10px rgba(255, 1, 1, 0.3)",
+    transition: "all 0.2s ease",
   },
 
   tableBox: {
     overflow: "auto",
-    maxHeight: "320px",
-    border: "1px solid #e2e8f0",
-    borderRadius: "8px",
+    maxHeight: "350px",
+    border: "1px solid rgba(56, 189, 248, 0.2)",
+    borderRadius: "12px",
+    background: "rgba(15, 23, 42, 0.8)",
+    boxShadow: "inset 0 2px 10px rgba(0, 0, 0, 0.2)",
   },
 
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    fontSize: "13px",
+    fontSize: "14px",
+  },
+
+  tableHeader: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    padding: "10px",
+  },
+
+  tableCell: {
+    color: "#e2e8f0",
+    padding: "10px",
   },
 
   actions: {
     display: "flex",
-    gap: "10px",
-    marginTop: "18px",
+    gap: "12px",
+    marginTop: "20px",
+  },
+
+  actionButton: {
+    padding: "10px 18px",
+    background: "rgba(56, 189, 248, 0.2)",
+    border: "1px solid rgba(56, 189, 248, 0.3)",
+    borderRadius: "8px",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontWeight: 600,
+    transition: "all 0.2s ease",
+    fontSize: "14px",
   },
 
   result: {
-    marginTop: "15px",
-    padding: "15px",
-    background: "#0f172a",
-    color: "#67e8f9",
-    borderRadius: "8px",
+    marginTop: "20px",
+    padding: "20px",
+    background: "rgba(15, 23, 42, 0.9)",
+    color: "#56ccf2",
+    borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    fontSize: "13px",
+    fontSize: "14px",
+    border: "1px solid rgba(56, 189, 248, 0.2)",
+    boxShadow: "inset 0 2px 10px rgba(0, 0, 0, 0.3)",
+    fontFamily: "monospace",
   },
 
   history: {
-    padding: "15px 0",
-    borderBottom: "1px solid #e2e8f0",
+    padding: "20px 0",
+    borderBottom: "1px solid rgba(56, 189, 248, 0.2)",
   },
 
   historyTop: {
     display: "flex",
     justifyContent: "space-between",
-    marginBottom: "7px",
+    marginBottom: "10px",
   },
 
   muted: {
-    color: "#64748b",
+    color: "#94a3b8",
+    fontSize: "13px",
   },
 };
 
