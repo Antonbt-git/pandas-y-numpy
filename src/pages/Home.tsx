@@ -125,28 +125,30 @@ const styles: { [key: string]: React.CSSProperties } = {
 
 function Home() {
   return (
-    <div className="page-container">
-      
-      <h1 className="page-title">BIENVENIDO</h1>
-      
-      <p className="intro-text">
-        Este es el inicio de nuestro proyecto <strong>React + TypeScript</strong>.
-      </p>
+    <div style={styles.mainContainer}>
 
-      <div className="white-box">
-        
-        <div className="info-card">
-          <h2>¿Qué es Pandas en Python?</h2>
-          <p>
-            Pandas es una biblioteca de Python de código abierto usada para la manipulación y el análisis de datos. 
-            Permite trabajar de forma rápida y flexible con datos en forma de tablas (como hojas de cálculo de Excel o tablas SQL), 
+      <div style={styles.headerHero}>
+        <h1 style={styles.titleHero}>BIENVENIDO</h1>
+
+        <p style={styles.subtitleHero}>
+          Este es el inicio de nuestro proyecto <strong>React + TypeScript</strong>.
+        </p>
+      </div>
+
+      <div style={styles.moreInfoSection}>
+
+        <div style={styles.featureCard}>
+          <h2 style={styles.featureTitle}>¿Qué es Pandas en Python?</h2>
+          <p style={styles.featureText}>
+            Pandas es una biblioteca de Python de código abierto usada para la manipulación y el análisis de datos.
+            Permite trabajar de forma rápida y flexible con datos en forma de tablas (como hojas de cálculo de Excel o tablas SQL),
             facilitando tareas como limpiar, filtrar, unir y resumir información numérica y estadística.
           </p>
         </div>
 
-        <div className="info-card">
-          <h2>Estructuras principales de Pandas:</h2>
-          <ul>
+        <div style={styles.featureCard}>
+          <h2 style={styles.featureTitle}>Estructuras principales de Pandas:</h2>
+          <ul style={styles.infoTextList}>
             <li><strong>Series:</strong> Una columna o vector de datos unidimensional con etiquetas (índices).</li>
             <li><strong>DataFrame:</strong> Una tabla bidimensional de filas y columnas, muy parecida a una tabla de Excel.</li>
             <li><strong>Limpieza de Datos:</strong> Herramientas inigualables para tratar valores nulos, duplicados y datos inconsistentes.</li>
