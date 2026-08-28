@@ -5,7 +5,11 @@ function Navbar() {
   return (
     <header className="navbar">
       <div className="container navbar-content">
+<<<<<<< HEAD
         <h1 className="logo">Mi Proyecto Python</h1>
+=======
+        <h1 className="logo">Mi Proyecto <span>Python</span></h1>
+>>>>>>> master
 
         <nav>
           <NavLink to="/">Inicio</NavLink>

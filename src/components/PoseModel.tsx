@@ -134,12 +134,16 @@ const PoseModel = () => {
             return;
         }
 
+<<<<<<< HEAD
         ctx.clearRect(
             0,
             0,
             canvas.width,
             canvas.height
         );
+=======
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+>>>>>>> master
 
         ctx.drawImage(
             webcamRef.current.canvas,
@@ -168,10 +172,14 @@ const PoseModel = () => {
 
     const stopCamera = () => {
         if (animationRef.current !== null) {
+<<<<<<< HEAD
             window.cancelAnimationFrame(
                 animationRef.current
             );
 
+=======
+            window.cancelAnimationFrame(animationRef.current);
+>>>>>>> master
             animationRef.current = null;
         }
 
@@ -187,9 +195,13 @@ const PoseModel = () => {
     useEffect(() => {
         return () => {
             if (animationRef.current !== null) {
+<<<<<<< HEAD
                 window.cancelAnimationFrame(
                     animationRef.current
                 );
+=======
+                window.cancelAnimationFrame(animationRef.current);
+>>>>>>> master
             }
 
             if (webcamRef.current) {
@@ -200,6 +212,7 @@ const PoseModel = () => {
 
     return (
         <div>
+<<<<<<< HEAD
             <h1>Detección de Postura</h1>
 
             <p
@@ -248,10 +261,25 @@ const PoseModel = () => {
                         marginBottom: "20px",
                     }}
                 >
+=======
+            <h1 className="tm-title">Detección de Postura</h1>
+
+            <p className="tm-lead">
+                Utiliza la cámara para detectar tu postura corporal mediante Machine Learning.
+            </p>
+
+            {!started ? (
+                <button type="button" onClick={init} className="tm-btn-start">
+                    Iniciar cámara
+                </button>
+            ) : (
+                <button type="button" onClick={stopCamera} className="tm-btn-stop">
+>>>>>>> master
                     Detener cámara
                 </button>
             )}
 
+<<<<<<< HEAD
             <div
                 style={{
                     marginTop: "20px",
@@ -344,10 +372,49 @@ const PoseModel = () => {
                             </div>
                         )
                     )}
+=======
+            <div className="tm-stage">
+                <canvas ref={canvasRef} className="tm-canvas" />
+            </div>
+
+            {started && predictions.length > 0 && (
+                <div className="tm-results">
+                    <h3>Resultados</h3>
+
+                    {predictions.map((prediction, index) => (
+                        <div
+                            key={`${prediction.className}-${index}`}
+                            className="tm-result-row"
+                        >
+                            <div className="tm-result-label">
+                                <span>{prediction.className}</span>
+                                <strong>
+                                    {(prediction.probability * 100).toFixed(1)}%
+                                </strong>
+                            </div>
+
+                            <div className="tm-bar-track">
+                                <div
+                                    className="tm-bar-fill"
+                                    style={{
+                                        width: `${Math.min(
+                                            Math.max(prediction.probability * 100, 0),
+                                            100
+                                        )}%`,
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    ))}
+>>>>>>> master
                 </div>
             )}
         </div>
     );
 };
 
+<<<<<<< HEAD
 export default PoseModel;
+=======
+export default PoseModel;
+>>>>>>> master

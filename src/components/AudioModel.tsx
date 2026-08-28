@@ -1,5 +1,8 @@
 import React, { useRef, useState } from "react";
+<<<<<<< HEAD
 import * as tf from "@tensorflow/tfjs";
+=======
+>>>>>>> master
 import * as speechCommands from "@tensorflow-models/speech-commands";
 
 const MODEL_URL = `${window.location.origin}/audio_model/`;
@@ -18,6 +21,7 @@ const AudioModel = (): React.ReactElement => {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
 
   const createModel = async () => {
+<<<<<<< HEAD
   const checkpointURL = MODEL_URL + "model.json";
   const metadataURL = MODEL_URL + "metadata.json";
 
@@ -32,6 +36,22 @@ const AudioModel = (): React.ReactElement => {
 
   return recognizer;
 };
+=======
+    const checkpointURL = MODEL_URL + "model.json";
+    const metadataURL = MODEL_URL + "metadata.json";
+
+    const recognizer = speechCommands.create(
+      "BROWSER_FFT",
+      undefined,
+      checkpointURL,
+      metadataURL
+    );
+
+    await recognizer.ensureModelLoaded();
+
+    return recognizer;
+  };
+>>>>>>> master
 
   const init = async () => {
     try {
@@ -50,12 +70,26 @@ const AudioModel = (): React.ReactElement => {
 
       await recognizer.listen(
         (result) => {
+<<<<<<< HEAD
           const scores = result.scores;
+=======
+          // `scores` puede venir como Float32Array (un solo resultado)
+          // o como Float32Array[] (resultados en lote). Normalizamos
+          // siempre al primer arreglo para poder indexarlo como number[].
+          const rawScores = result.scores;
+          const scores: Float32Array = Array.isArray(rawScores)
+            ? rawScores[0]
+            : rawScores;
+>>>>>>> master
 
           setPredictions(
             classLabels.map((label, index) => ({
               label,
+<<<<<<< HEAD
               probability: scores[index],
+=======
+              probability: scores[index] ?? 0,
+>>>>>>> master
             }))
           );
         },
@@ -75,7 +109,11 @@ const AudioModel = (): React.ReactElement => {
       );
 
       alert(
+<<<<<<< HEAD
         "No se pudo cargar el modelo de audio. Verifica la carpeta my_model."
+=======
+        "No se pudo cargar el modelo de audio. Verifica la carpeta audio_model."
+>>>>>>> master
       );
     }
   };
@@ -92,6 +130,7 @@ const AudioModel = (): React.ReactElement => {
 
   return (
     <div>
+<<<<<<< HEAD
       <h1>Reconocimiento de Audio</h1>
 
       <p
@@ -137,11 +176,26 @@ const AudioModel = (): React.ReactElement => {
             fontSize: "14px",
           }}
         >
+=======
+      <h1 className="tm-title">Reconocimiento de Audio</h1>
+
+      <p className="tm-lead">
+        Habla o reproduce un sonido para que el modelo identifique la clase correspondiente.
+      </p>
+
+      {!started ? (
+        <button type="button" onClick={init} className="tm-btn-start">
+          🎤 Iniciar micrófono
+        </button>
+      ) : (
+        <button type="button" onClick={stopAudio} className="tm-btn-stop">
+>>>>>>> master
           ⏹ Detener micrófono
         </button>
       )}
 
       {started && (
+<<<<<<< HEAD
         <div
           style={{
             marginTop: "25px",
@@ -194,6 +248,22 @@ const AudioModel = (): React.ReactElement => {
                     borderRadius: "10px",
                     transition: "width 0.2s ease",
                   }}
+=======
+        <div className="tm-results">
+          <h3>Resultados</h3>
+
+          {predictions.map((prediction, index) => (
+            <div key={index} className="tm-result-row">
+              <div className="tm-result-label">
+                <span>{prediction.label}</span>
+                <strong>{(prediction.probability * 100).toFixed(1)}%</strong>
+              </div>
+
+              <div className="tm-bar-track">
+                <div
+                  className="tm-bar-fill"
+                  style={{ width: `${prediction.probability * 100}%` }}
+>>>>>>> master
                 />
               </div>
             </div>
@@ -204,4 +274,8 @@ const AudioModel = (): React.ReactElement => {
   );
 };
 
+<<<<<<< HEAD
 export default AudioModel;
+=======
+export default AudioModel;
+>>>>>>> master
