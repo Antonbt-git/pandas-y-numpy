@@ -1,320 +1,353 @@
-import React, { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as tmPose from "@teachablemachine/pose";
+import * as posenet from "@tensorflow-models/posenet";
 
-const MODEL_URL = `${window.location.origin}/pose_model/`;
+const MODEL_URL = "/pose_model/";
 
 type Prediction = {
-  className: string;
-  probability: number;
+    className: string;
+    probability: number;
 };
 
-const PoseModel = (): React.ReactElement => {
-  const webcamRef = useRef<tmPose.Webcam | null>(null);
-  const animationRef = useRef<number | null>(null);
+const PoseModel = () => {
+    const webcamRef = useRef<tmPose.Webcam | null>(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const animationRef = useRef<number | null>(null);
 
-  const [started, setStarted] = useState(false);
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
+    const [started, setStarted] = useState(false);
+    const [predictions, setPredictions] = useState<Prediction[]>([]);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+    const init = async () => {
+        try {
+            const modelURL = `${MODEL_URL}model.json`;
+            const metadataURL = `${MODEL_URL}metadata.json`;
 
-  const init = async () => {
-    try {
-      const modelURL = MODEL_URL + "model.json";
-      const metadataURL = MODEL_URL + "metadata.json";
+            const model = await tmPose.load(
+                modelURL,
+                metadataURL
+            );
 
-      // Cargar modelo
-      const model = await tmPose.load(
-        modelURL,
-        metadataURL
-      );
+            const maxPredictions =
+                model.getTotalClasses();
 
-      const maxPredictions = model.getTotalClasses();
+            const size = 300;
+            const flip = true;
 
-      // Configurar cámara
-      const size = 300;
-      const flip = true;
+            const webcam = new tmPose.Webcam(
+                size,
+                size,
+                flip
+            );
 
-      const webcam = new tmPose.Webcam(
-        size,
-        size,
-        flip
-      );
+            await webcam.setup();
+            await webcam.play();
 
-      await webcam.setup();
-      await webcam.play();
+            webcamRef.current = webcam;
 
-      webcamRef.current = webcam;
+            if (canvasRef.current) {
+                canvasRef.current.width = size;
+                canvasRef.current.height = size;
+            }
 
-      if (canvasRef.current) {
-        canvasRef.current.width = size;
-        canvasRef.current.height = size;
-      }
+            setPredictions(
+                Array.from(
+                    { length: maxPredictions },
+                    (_, index) => ({
+                        className: `Clase ${index + 1}`,
+                        probability: 0,
+                    })
+                )
+            );
 
-      setPredictions(
-        Array.from(
-          { length: maxPredictions },
-          (_, index) => ({
-            className: `Clase ${index + 1}`,
-            probability: 0,
-          })
-        )
-      );
+            setStarted(true);
 
-      setStarted(true);
+            const loop = async () => {
+                if (!webcamRef.current) {
+                    return;
+                }
 
-      const loop = async () => {
-        if (!webcamRef.current) return;
+                webcamRef.current.update();
 
-        webcamRef.current.update();
+                try {
+                    const { pose, posenetOutput } =
+                        await model.estimatePose(
+                            webcamRef.current.canvas
+                        );
 
-        await predict(model);
+                    const result =
+                        await model.predict(
+                            posenetOutput
+                        );
 
-        animationRef.current =
-          window.requestAnimationFrame(loop);
-      };
+                    setPredictions(
+                        result.map((item) => ({
+                            className: item.className,
+                            probability:
+                                typeof item.probability ===
+                                    "number"
+                                    ? item.probability
+                                    : 0,
+                        }))
+                    );
 
-      loop();
+                    drawPose(pose);
+                } catch (error) {
+                    console.error(
+                        "Error durante la predicción:",
+                        error
+                    );
+                }
 
-    } catch (error) {
-      console.error(
-        "Error al iniciar el modelo de postura:",
-        error
-      );
+                if (webcamRef.current) {
+                    animationRef.current =
+                        window.requestAnimationFrame(loop);
+                }
+            };
 
-      alert(
-        "No se pudo cargar el modelo de postura. Verifica la carpeta pose_model."
-      );
-    }
-  };
+            loop();
+        } catch (error) {
+            console.error(
+                "Error al iniciar el modelo de postura:",
+                error
+            );
 
-  const predict = async (
-    model: tmPose.CustomPoseNet
-  ) => {
-    if (
-      !webcamRef.current ||
-      !canvasRef.current
-    ) {
-      return;
-    }
+            stopCamera();
 
-    const {
-      pose,
-      posenetOutput,
-    } = await model.estimatePose(
-      webcamRef.current.canvas
-    );
+            alert(
+                "No se pudo cargar el modelo de postura. Verifica la carpeta pose_model."
+            );
+        }
+    };
 
-    const prediction =
-      await model.predict(posenetOutput);
+    const drawPose = (
+        pose: posenet.Pose | undefined
+    ) => {
+        const canvas = canvasRef.current;
 
-    setPredictions(prediction);
+        if (!canvas || !webcamRef.current) {
+            return;
+        }
 
-    drawPose(pose);
-  };
+        const ctx = canvas.getContext("2d");
 
-  const drawPose = (
-    pose: tmPose.Pose | undefined
-  ) => {
-    const canvas = canvasRef.current;
+        if (!ctx) {
+            return;
+        }
 
-    if (!canvas || !webcamRef.current) {
-      return;
-    }
+        ctx.clearRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
 
-    const ctx = canvas.getContext("2d");
+        ctx.drawImage(
+            webcamRef.current.canvas,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
 
-    if (!ctx) return;
+        if (pose) {
+            const minPartConfidence = 0.5;
 
-    // Dibujar cámara
-    ctx.drawImage(
-      webcamRef.current.canvas,
-      0,
-      0
-    );
+            tmPose.drawKeypoints(
+                pose.keypoints,
+                minPartConfidence,
+                ctx
+            );
 
-    // Dibujar puntos del cuerpo
-    if (pose) {
-      const minPartConfidence = 0.5;
+            tmPose.drawSkeleton(
+                pose.keypoints,
+                minPartConfidence,
+                ctx
+            );
+        }
+    };
 
-      tmPose.drawKeypoints(
-        pose.keypoints,
-        minPartConfidence,
-        ctx
-      );
+    const stopCamera = () => {
+        if (animationRef.current !== null) {
+            window.cancelAnimationFrame(
+                animationRef.current
+            );
 
-      tmPose.drawSkeleton(
-        pose.keypoints,
-        minPartConfidence,
-        ctx
-      );
-    }
-  };
+            animationRef.current = null;
+        }
 
-  const stopCamera = () => {
-    if (animationRef.current) {
-      window.cancelAnimationFrame(
-        animationRef.current
-      );
-    }
+        if (webcamRef.current) {
+            webcamRef.current.stop();
+            webcamRef.current = null;
+        }
 
-    if (webcamRef.current) {
-      webcamRef.current.stop();
-      webcamRef.current = null;
-    }
+        setStarted(false);
+        setPredictions([]);
+    };
 
-    setStarted(false);
-    setPredictions([]);
-  };
+    useEffect(() => {
+        return () => {
+            if (animationRef.current !== null) {
+                window.cancelAnimationFrame(
+                    animationRef.current
+                );
+            }
 
-  return (
-    <div>
-      <h1>Detección de Postura</h1>
+            if (webcamRef.current) {
+                webcamRef.current.stop();
+            }
+        };
+    }, []);
 
-      <p
-        style={{
-          color: "#94a3b8",
-          marginBottom: "20px",
-        }}
-      >
-        Utiliza la cámara para detectar tu postura
-        corporal mediante Machine Learning.
-      </p>
+    return (
+        <div>
+            <h1>Detección de Postura</h1>
 
-      {!started ? (
-        <button
-          type="button"
-          onClick={init}
-          style={{
-            padding: "12px 25px",
-            border: "none",
-            borderRadius: "8px",
-            background:
-              "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%)",
-            color: "#ffffff",
-            fontWeight: "bold",
-            cursor: "pointer",
-            fontSize: "14px",
-          }}
-        >
-          Iniciar cámara
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={stopCamera}
-          style={{
-            padding: "12px 25px",
-            border:
-              "1px solid rgba(255, 1, 1, 0.3)",
-            borderRadius: "8px",
-            background:
-              "rgba(255, 1, 1, 0.2)",
-            color: "#ff0101",
-            fontWeight: "bold",
-            cursor: "pointer",
-            fontSize: "14px",
-            marginBottom: "20px",
-          }}
-        >
-          Detener cámara
-        </button>
-      )}
-
-      {/* CANVAS */}
-      <div
-        style={{
-          marginTop: "20px",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <canvas
-          ref={canvasRef}
-          style={{
-            width: "300px",
-            height: "300px",
-            borderRadius: "12px",
-            background: "#0f172a",
-            border:
-              "1px solid rgba(56, 189, 248, 0.2)",
-          }}
-        />
-      </div>
-
-      {/* RESULTADOS */}
-      {started && predictions.length > 0 && (
-        <div
-          style={{
-            marginTop: "25px",
-            padding: "20px",
-            background:
-              "rgba(15, 23, 42, 0.8)",
-            borderRadius: "12px",
-            border:
-              "1px solid rgba(56, 189, 248, 0.2)",
-          }}
-        >
-          <h3 style={{ marginTop: 0 }}>
-            Resultados
-          </h3>
-
-          {predictions.map(
-            (prediction, index) => (
-              <div
-                key={index}
+            <p
                 style={{
-                  marginBottom: "15px",
+                    color: "#94a3b8",
+                    marginBottom: "20px",
                 }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent:
-                      "space-between",
-                    marginBottom: "6px",
-                  }}
-                >
-                  <span>
-                    {prediction.className}
-                  </span>
+            >
+                Utiliza la cámara para detectar tu postura
+                corporal mediante Machine Learning.
+            </p>
 
-                  <strong>
-                    {(
-                      prediction.probability *
-                      100
-                    ).toFixed(1)}
-                    %
-                  </strong>
-                </div>
-
-                <div
-                  style={{
-                    width: "100%",
-                    height: "8px",
-                    background: "#1e293b",
-                    borderRadius: "10px",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
+            {!started ? (
+                <button
+                    type="button"
+                    onClick={init}
                     style={{
-                      width: `${
-                        prediction.probability *
-                        100
-                      }%`,
-                      height: "100%",
-                      background: "#38bdf8",
-                      borderRadius: "10px",
+                        padding: "12px 25px",
+                        border: "none",
+                        borderRadius: "8px",
+                        background:
+                            "linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%)",
+                        color: "#ffffff",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        fontSize: "14px",
                     }}
-                  />
+                >
+                    Iniciar cámara
+                </button>
+            ) : (
+                <button
+                    type="button"
+                    onClick={stopCamera}
+                    style={{
+                        padding: "12px 25px",
+                        border:
+                            "1px solid rgba(255, 1, 1, 0.3)",
+                        borderRadius: "8px",
+                        background:
+                            "rgba(255, 1, 1, 0.2)",
+                        color: "#ff0101",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        marginBottom: "20px",
+                    }}
+                >
+                    Detener cámara
+                </button>
+            )}
+
+            <div
+                style={{
+                    marginTop: "20px",
+                    display: "flex",
+                    justifyContent: "center",
+                }}
+            >
+                <canvas
+                    ref={canvasRef}
+                    style={{
+                        width: "300px",
+                        height: "300px",
+                        borderRadius: "12px",
+                        background: "#0f172a",
+                        border:
+                            "1px solid rgba(56, 189, 248, 0.2)",
+                    }}
+                />
+            </div>
+
+            {started && predictions.length > 0 && (
+                <div
+                    style={{
+                        marginTop: "25px",
+                        padding: "20px",
+                        background:
+                            "rgba(15, 23, 42, 0.8)",
+                        borderRadius: "12px",
+                        border:
+                            "1px solid rgba(56, 189, 248, 0.2)",
+                    }}
+                >
+                    <h3 style={{ marginTop: 0 }}>
+                        Resultados
+                    </h3>
+
+                    {predictions.map(
+                        (prediction, index) => (
+                            <div
+                                key={`${prediction.className}-${index}`}
+                                style={{
+                                    marginBottom: "15px",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent:
+                                            "space-between",
+                                        marginBottom: "6px",
+                                    }}
+                                >
+                                    <span>
+                                        {prediction.className}
+                                    </span>
+
+                                    <strong>
+                                        {(
+                                            prediction.probability * 100
+                                        ).toFixed(1)}
+                                        %
+                                    </strong>
+                                </div>
+
+                                <div
+                                    style={{
+                                        width: "100%",
+                                        height: "8px",
+                                        background: "#1e293b",
+                                        borderRadius: "10px",
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            width: `${Math.min(
+                                                Math.max(
+                                                    prediction.probability *
+                                                    100,
+                                                    0
+                                                ),
+                                                100
+                                            )}%`,
+                                            height: "100%",
+                                            background: "#38bdf8",
+                                            borderRadius: "10px",
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        )
+                    )}
                 </div>
-              </div>
-            )
-          )}
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default PoseModel;
