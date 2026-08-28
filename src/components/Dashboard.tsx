@@ -1,5 +1,8 @@
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ImageModel from "./ImageModel";
+import AudioModel from "./AudioModel";
+import PoseModel from "./PoseModel";
 
 type Lib = "Pandas" | "NumPy";
 
@@ -21,7 +24,7 @@ type History = {
 };
 
 const Dashboard = (): React.ReactElement => {
-  const [section, setSection] = useState<"pandas" | "numpy" | "reports">("pandas");
+  const [section, setSection] = useState<"pandas" | "numpy" | "reports" | "imagen" | "audio" | "postura">("pandas");
   const [files, setFiles] = useState<CsvData[]>([]);
   const [history, setHistory] = useState<History[]>([]);
   const [dragging, setDragging] = useState(false);
@@ -179,164 +182,238 @@ const Dashboard = (): React.ReactElement => {
     setFiles(current => current.filter(file => file.key !== key));
   };
 
-  const changeSection = (value: "pandas" | "numpy" | "reports") => {
+  const changeSection = (value: "pandas" | "numpy" | "reports" | "imagen" | "audio" | "postura") => {
     setSection(value);
     setFiles(current => current.map(file => ({ ...file, result: undefined })));
   };
   const navigate = useNavigate();
 
   return (
-    <div style={css.app}>
-      <aside style={css.menu}>
-        <div style={css.logo}>DASHBOARD</div>
+  <div style={css.app}>
+    {/* MENÚ LATERAL */}
+    <aside style={css.menu}>
+      <div style={css.logo}>DASHBOARD</div>
 
-        <button
-          style={section === "pandas" ? css.selected : css.menuButton}
-          onClick={() => changeSection("pandas")}
-        >
-          Pandas
-        </button>
+      <button
+        style={section === "pandas" ? css.selected : css.menuButton}
+        onClick={() => changeSection("pandas")}
+      >
+        Pandas
+      </button>
 
-        <button
-          style={section === "numpy" ? css.selected : css.menuButton}
-          onClick={() => changeSection("numpy")}
-        >
-          NumPy
-        </button>
+      <button
+        style={section === "numpy" ? css.selected : css.menuButton}
+        onClick={() => changeSection("numpy")}
+      >
+        NumPy
+      </button>
 
-        <button
-          style={section === "reports" ? css.selected : css.menuButton}
-          onClick={() => changeSection("reports")}
-        >
-          Reportes
-        </button>
-      </aside>
+      <button
+        style={section === "reports" ? css.selected : css.menuButton}
+        onClick={() => changeSection("reports")}
+      >
+        Reportes
+      </button>
 
-      <main style={css.content}>
-        {section !== "reports" && (
-          <>
-            <div style={css.toolbar}>
-              <input
-                ref={input}
-                type="file"
-                accept=".csv"
-                hidden
-                onChange={chooseFile}
-              />
+      <button
+        style={section === "imagen" ? css.selected : css.menuButton}
+        onClick={() => changeSection("imagen")}
+      >
+        Imagen
+      </button>
 
-              <div
-                style={{
-                  ...css.drop,
-                  borderColor: dragging ? "rgba(56, 189, 248, 0.6)" : "rgba(56, 189, 248, 0.3)",
-                  backgroundColor: dragging ? "rgba(30, 41, 59, 0.8)" : "rgba(30, 41, 59, 0.6)",
-                }}
-                onDragOver={e => {
-                  e.preventDefault();
-                  setDragging(true);
-                }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={dropFile}
-                onClick={() => input.current?.click()}
-              >
-                Suelta aquí tu archivo CSV
-              </div>
+      <button
+        style={section === "audio" ? css.selected : css.menuButton}
+        onClick={() => changeSection("audio")}
+      >
+        Audio
+      </button>
 
-              <button style={css.upload} onClick={() => input.current?.click()}>
-                + Cargar CSV
-              </button>
+      <button
+        style={section === "postura" ? css.selected : css.menuButton}
+        onClick={() => changeSection("postura")}
+      >
+        Postura
+      </button>
+    </aside>
 
-              <button style={css.back} onClick={() => navigate(-1)}>
-                ← Regresar
-              </button>
+    {/* CONTENIDO PRINCIPAL */}
+    <main style={css.content}>
+
+      {/* ================= PANDAS / NUMPY ================= */}
+      {(section === "pandas" || section === "numpy") && (
+        <>
+          <div style={css.toolbar}>
+            <input
+              ref={input}
+              type="file"
+              accept=".csv"
+              hidden
+              onChange={chooseFile}
+            />
+
+            <div
+              style={{
+                ...css.drop,
+                borderColor: dragging
+                  ? "rgba(56, 189, 248, 0.6)"
+                  : "rgba(56, 189, 248, 0.3)",
+                backgroundColor: dragging
+                  ? "rgba(30, 41, 59, 0.8)"
+                  : "rgba(30, 41, 59, 0.6)",
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragging(true);
+              }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={dropFile}
+              onClick={() => input.current?.click()}
+            >
+              Suelta aquí tu archivo CSV
             </div>
 
-            {!files.length && (
-              <div style={css.empty}>
-                <h2>No hay archivos</h2>
-                <p>Selecciona un CSV para comenzar a trabajar.</p>
-              </div>
-            )}
+            <button
+              style={css.upload}
+              onClick={() => input.current?.click()}
+            >
+              + Cargar CSV
+            </button>
 
-            {files.map(file => (
-              <section key={file.key} style={css.card}>
-                <header style={css.cardHeader}>
-                  <div>
-                    <h2>{section === "pandas" ? "Pandas" : "NumPy"}</h2>
-                    <span>{file.name}</span>
-                  </div>
+            <button
+              style={css.back}
+              onClick={() => navigate(-1)}
+            >
+              ← Regresar
+            </button>
+          </div>
 
-                  <button
-                    style={css.remove}
-                    onClick={() => remove(file.key)}
-                  >
-                    Eliminar
-                  </button>
-                </header>
+          {!files.length && (
+            <div style={css.empty}>
+              <h2>No hay archivos</h2>
+              <p>Selecciona un CSV para comenzar a trabajar.</p>
+            </div>
+          )}
 
-                <div style={css.tableBox}>
-                  <table style={css.table}>
-                    <thead>
-                      <tr>
-                        {file.columns.map(column => (
-                          <th key={column} style={css.tableHeader}>{column}</th>
+          {files.map((file) => (
+            <section key={file.key} style={css.card}>
+
+              <header style={css.cardHeader}>
+                <div>
+                  <h2>
+                    {section === "pandas" ? "Pandas" : "NumPy"}
+                  </h2>
+
+                  <span>{file.name}</span>
+                </div>
+
+                <button
+                  style={css.remove}
+                  onClick={() => remove(file.key)}
+                >
+                  Eliminar
+                </button>
+              </header>
+
+              {/* TABLA */}
+              <div style={css.tableBox}>
+                <table style={css.table}>
+                  <thead>
+                    <tr>
+                      {file.columns.map((column) => (
+                        <th
+                          key={column}
+                          style={css.tableHeader}
+                        >
+                          {column}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {file.data.slice(0, 10).map((row, index) => (
+                      <tr key={index}>
+                        {file.columns.map((column, columnIndex) => (
+                          <td
+                            key={columnIndex}
+                            style={css.tableCell}
+                          >
+                            {row[column] ?? ""}
+                          </td>
                         ))}
                       </tr>
-                    </thead>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-                    <tbody>
-                      {file.data.slice(0, 10).map((row, index) => (
-                        <tr key={index}>
-                          {file.columns.map((_, column) => (
-                            <td key={column} style={css.tableCell}>{row[column] || ""}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              {/* BOTONES */}
+              <div style={css.actions}>
 
-                <div style={css.actions}>
-                  {section === "pandas" ? (
-                    <>
-                      <button style={css.actionButton} onClick={() => describe(file.key)}>
-                        Resumen
-                      </button>
+                {section === "pandas" ? (
+                  <>
+                    <button
+                      style={css.actionButton}
+                      onClick={() => describe(file.key)}
+                    >
+                      Resumen
+                    </button>
 
-                      <button style={css.actionButton} onClick={() => head(file.key)}>
-                        Primeros datos
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button style={css.actionButton} onClick={() => statistics(file.key)}>
-                        Estadísticas
-                      </button>
+                    <button
+                      style={css.actionButton}
+                      onClick={() => head(file.key)}
+                    >
+                      Primeros datos
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      style={css.actionButton}
+                      onClick={() => statistics(file.key)}
+                    >
+                      Estadísticas
+                    </button>
 
-                      <button style={css.actionButton} onClick={() => makeArray(file.key)}>
-                        Crear Array
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {file.result && (
-                  <pre style={css.result}>{file.result}</pre>
+                    <button
+                      style={css.actionButton}
+                      onClick={() => makeArray(file.key)}
+                    >
+                      Crear Array
+                    </button>
+                  </>
                 )}
-              </section>
-            ))}
-          </>
-        )}
 
-        {section === "reports" && (
-          <section style={css.card}>
-            <h1>Historial</h1>
+              </div>
 
-            {!history.length && (
-              <p style={css.muted}>Todavía no hay operaciones realizadas.</p>
-            )}
+              {/* RESULTADO */}
+              {file.result && (
+                <pre style={css.result}>
+                  {file.result}
+                </pre>
+              )}
 
-            {history.map(item => (
-              <article key={item.key} style={css.history}>
+            </section>
+          ))}
+        </>
+      )}
+
+      {/* ================= REPORTES ================= */}
+      {section === "reports" && (
+        <section style={css.card}>
+          <h1>Historial de operaciones</h1>
+
+          {!history.length ? (
+            <p style={css.muted}>
+              Todavía no hay operaciones realizadas.
+            </p>
+          ) : (
+            history.map((item) => (
+              <article
+                key={item.key}
+                style={css.history}
+              >
                 <div style={css.historyTop}>
                   <strong>
                     {item.lib} · {item.operation}
@@ -347,14 +424,65 @@ const Dashboard = (): React.ReactElement => {
 
                 <span>{item.file}</span>
 
-                <pre style={css.result}>{item.result}</pre>
+                <pre style={css.result}>
+                  {item.result}
+                </pre>
               </article>
-            ))}
-          </section>
-        )}
-      </main>
-    </div>
-  );
+            ))
+          )}
+        </section>
+      )}
+
+      {/* ================= IMAGEN ================= */}
+      {section === "imagen" && (
+        <section style={css.card}>
+          <ImageModel />
+
+          <div style={{ marginTop: "25px" }}>
+            <button
+              style={css.back}
+              onClick={() => navigate(-1)}
+            >
+              ← Regresar
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ================= AUDIO ================= */}
+      {section === "audio" && (
+        <section style={css.card}>
+          <AudioModel />
+
+          <div style={{ marginTop: "25px" }}>
+            <button
+              style={css.back}
+              onClick={() => navigate(-1)}
+            >
+              ← Regresar
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ================= POSTURA ================= */}
+      {section === "postura" && (
+        <section style={css.card}>
+          <PoseModel />
+
+          <div style={{ marginTop: "25px" }}>
+            <button
+              style={css.back}
+              onClick={() => navigate(-1)}
+            >
+              ← Regresar
+            </button>
+          </div>
+        </section>
+      )}
+    </main>
+  </div>
+);
 };
 
 const css: Record<string, React.CSSProperties> = {
